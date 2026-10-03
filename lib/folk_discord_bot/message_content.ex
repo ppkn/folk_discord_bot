@@ -3,14 +3,12 @@ defmodule FolkDiscordBot.MessageContent do
   alias FolkDiscordBot.MessageContent.Media
 
   defstruct author_name: nil,
-            message: nil,
             media: [],
             text: "",
             timestamp: nil
 
   @type t() :: %__MODULE__{
           author_name: String.t() | nil,
-          message: Nostrum.Struct.Message.t() | nil,
           media: [Media.t()],
           text: String.t(),
           timestamp: DateTime.t() | nil
@@ -19,7 +17,7 @@ defmodule FolkDiscordBot.MessageContent do
   @spec fetch_and_process(%{channel_id: integer(), message_id: integer()}) ::
           {:ok, t()} | {:error, any()}
   def fetch_and_process(msg) do
-    with {:ok, message} <- fetch(msg), do: process(message)
+    with {:ok, message} <- fetch(msg), do: {:ok, process(message)}
   end
 
   defp fetch(%{channel_id: channel_id, message_id: message_id}) do
@@ -27,25 +25,15 @@ defmodule FolkDiscordBot.MessageContent do
     Nostrum.Api.Message.get(channel_id, message_id)
   end
 
-  defp fetch(msg), do: {:error, "Need channel_id and message_id, got #{inspect(Map.keys(msg))}"}
-
-  @spec process(Nostrum.Struct.Message.t()) :: {:ok, t()}
+  @spec process(Nostrum.Struct.Message.t()) :: t()
   defp process(message) do
-    author_name = message.author.username
-    text = message.content
-    timestamp = message.timestamp
+    media = Enum.map(message.attachments, &Media.fetch_from_attachment/1)
 
-    media =
-      Enum.map(message.attachments, fn attachment ->
-        Media.fetch_from_attachment(attachment)
-      end)
-
-    {:ok,
-     %__MODULE__{
-       author_name: author_name,
-       media: media,
-       text: text,
-       timestamp: timestamp
-     }}
+    %__MODULE__{
+      author_name: message.author.username,
+      media: media,
+      text: message.content,
+      timestamp: message.timestamp
+    }
   end
 end
