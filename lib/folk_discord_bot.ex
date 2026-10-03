@@ -43,7 +43,9 @@ defmodule FolkDiscordBot do
     end
   end
 
-  defp wiki_client do
+  @doc "Builds a DokuWiki client from the `:dokuwiki` app config."
+  @spec wiki_client() :: {:ok, DokuWiki.client()} | {:error, {:missing_config, atom()}}
+  def wiki_client do
     :folk_discord_bot
     |> Application.get_env(:dokuwiki, [])
     |> DokuWiki.new()
