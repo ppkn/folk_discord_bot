@@ -21,10 +21,18 @@ defmodule FolkDiscordBot.WikiPage do
     """
 
     === #{message_content.author_name} | #{format_timestamp(message_content.timestamp)} ===
-    #{message_content.text}
+    #{format_text(message_content.text)}
 
     #{render_uploads(uploads)}
     """
+  end
+
+  # DokuWiki joins single newlines into one paragraph, so mark line breaks with
+  # `\\`. Blank lines already start a new paragraph and are left alone.
+  defp format_text(text) do
+    text
+    |> String.split(~r/\n{2,}/)
+    |> Enum.map_join("\n\n", &String.replace(&1, "\n", "\\\\\n"))
   end
 
   defp format_timestamp(timestamp), do: Calendar.strftime(timestamp, "%Y-%m-%d %H:%M UTC")

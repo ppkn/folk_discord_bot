@@ -35,6 +35,12 @@ defmodule FolkDiscordBot.WikiPageTest do
       assert content =~ "hello"
     end
 
+    test "keeps single line breaks and paragraph breaks" do
+      message_content = %{@message_content | text: "one\ntwo\n\n\nthree"}
+
+      assert WikiPage.render(message_content, []) =~ "one\\\\\ntwo\n\nthree\n"
+    end
+
     test "renders uploaded files and errors in order" do
       content = WikiPage.render(@message_content, [{:ok, "newsletters:a.png"}, {:error, "boom"}])
 
