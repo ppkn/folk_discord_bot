@@ -5,7 +5,7 @@ defmodule FolkDiscordBot.WikiPageTest do
 
   @message_content %{
     author_name: "dpip",
-    timestamp: ~U[2026-10-02 01:56:40Z],
+    timestamp: ~U[2026-10-02 01:56:40.273000Z],
     text: "hello",
     media: []
   }
@@ -31,7 +31,7 @@ defmodule FolkDiscordBot.WikiPageTest do
     test "includes the header and text" do
       content = WikiPage.render(@message_content, [])
 
-      assert content =~ "=== dpip | 2026-10-02 01:56:40Z ==="
+      assert content =~ "=== dpip | 2026-10-02 01:56 UTC ==="
       assert content =~ "hello"
     end
 

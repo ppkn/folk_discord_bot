@@ -20,12 +20,14 @@ defmodule FolkDiscordBot.WikiPage do
   def render(message_content, uploads) do
     """
 
-    === #{message_content.author_name} | #{DateTime.to_string(message_content.timestamp)} ===
+    === #{message_content.author_name} | #{format_timestamp(message_content.timestamp)} ===
     #{message_content.text}
 
     #{render_uploads(uploads)}
     """
   end
+
+  defp format_timestamp(timestamp), do: Calendar.strftime(timestamp, "%Y-%m-%d %H:%M UTC")
 
   defp render_uploads(uploads) do
     Enum.map_join(uploads, fn
