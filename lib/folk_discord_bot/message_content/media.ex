@@ -33,7 +33,7 @@ defmodule FolkDiscordBot.MessageContent.Media do
   defp fetch_bytes(url) do
     case Req.get(url, decode_body: false) do
       {:ok, %Req.Response{status: 200, body: body}} when is_binary(body) ->
-        IO.puts("Successfully fetched #{byte_size(body)} bytes")
+        Logger.info("Fetched media", url: url, byte_count: byte_size(body))
         body
 
       _ ->
