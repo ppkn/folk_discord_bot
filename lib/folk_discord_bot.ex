@@ -59,6 +59,8 @@ defmodule FolkDiscordBot do
     DokuwikiApi.append_page(page_name, wiki_content)
   end
 
+  defp upload_media(%{bytes: nil, error: error}) when is_binary(error), do: {:skip, error}
+
   defp upload_media(%{bytes: nil, name: name}),
     do: {:skip, "Unable to fetch #{name} from Discord"}
 
