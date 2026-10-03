@@ -1,7 +1,8 @@
 import Config
 
 config :nostrum,
-  youtubedl: false,
-  streamlink: false
+  ffmpeg: false,
+  streamlink: false,
+  youtubedl: false
 
 import_config "#{config_env()}.exs"
