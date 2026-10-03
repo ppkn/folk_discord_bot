@@ -1,0 +1,13 @@
+# fly.toml app configuration file generated for folk-discord-bot on 2026-10-03T00:35:57-06:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'folk-discord-bot'
+primary_region = 'ewr'
+swap_size_mb = 512
+
+[[vm]]
+  memory = '256mb'
+  cpus = 1
+  memory_mb = 256
