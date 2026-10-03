@@ -1,6 +1,4 @@
 defmodule FolkDiscordBot.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
   @moduledoc false
 
   use Application
@@ -11,8 +9,6 @@ defmodule FolkDiscordBot.Application do
       FolkDiscordBot.Consumer
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one, name: FolkDiscordBot.Supervisor]
     Supervisor.start_link(children, opts)
   end
