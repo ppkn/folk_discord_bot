@@ -3,28 +3,31 @@ defmodule FolkDiscordBot.MessageContent.Media do
 
   @max_bytes 25 * 1024 * 1024
 
-  defstruct [:bytes, :name, :error]
+  defstruct [:id, :bytes, :name, :error]
 
   @type t() :: %__MODULE__{
+          id: Nostrum.Snowflake.t(),
           bytes: binary() | nil,
           name: String.t(),
           error: String.t() | nil
         }
 
-  def fetch_from_attachment(%{filename: filename, size: size}) when size > @max_bytes do
+  def fetch_from_attachment(%{id: id, filename: filename, size: size}) when size > @max_bytes do
     Logger.warning("Skipping oversized media", filename: filename)
 
     %__MODULE__{
+      id: id,
       bytes: nil,
       name: filename,
       error: "#{filename} is larger than #{div(@max_bytes, 1024 * 1024)}MB"
     }
   end
 
-  def fetch_from_attachment(%{filename: filename, url: url}) do
+  def fetch_from_attachment(%{id: id, filename: filename, url: url}) do
     Logger.info("Fetching media", filename: filename, url: url)
 
     %__MODULE__{
+      id: id,
       bytes: fetch_bytes(url),
       name: filename
     }

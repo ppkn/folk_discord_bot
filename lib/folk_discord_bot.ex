@@ -64,8 +64,8 @@ defmodule FolkDiscordBot do
   defp upload_media(%{bytes: nil, name: name}),
     do: {:skip, "Unable to fetch #{name} from Discord"}
 
-  defp upload_media(%{bytes: bytes, name: name}) do
-    filename = "newsletters:#{name}"
+  defp upload_media(%{id: id, bytes: bytes, name: name}) do
+    filename = "newsletters:#{short_id(id)}_#{name}"
 
     case DokuwikiApi.save_media(filename, Base.encode64(bytes)) do
       :ok ->
@@ -76,4 +76,8 @@ defmodule FolkDiscordBot do
         {:skip, "Unable to upload #{name} to DokuWiki"}
     end
   end
+
+  # Discord snowflakes are 17-19 digits. The trailing digits change fastest,
+  # so keeping the last 6 is enough to tell attachments apart.
+  defp short_id(id), do: id |> Integer.to_string() |> String.slice(-6, 6)
 end
