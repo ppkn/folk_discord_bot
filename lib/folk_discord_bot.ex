@@ -11,7 +11,7 @@ defmodule FolkDiscordBot do
       Logger.info("Updated page", page: page_name(message_content))
     else
       {:skip, reason} -> Logger.info("Skipping reaction processing", reason: reason)
-      {:error, error} -> Logger.error("Failed to process reaction", error: error)
+      {:error, error} -> Logger.error("Failed to process reaction", error: inspect(error))
     end
   end
 
@@ -67,7 +67,7 @@ defmodule FolkDiscordBot do
         {:ok, filename}
 
       {:error, error} ->
-        Logger.error("Failed to upload media to DokuWiki", error: error)
+        Logger.error("Failed to upload media to DokuWiki", error: inspect(error))
         {:skip, "Unable to upload #{name} to DokuWiki"}
     end
   end
