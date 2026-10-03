@@ -9,7 +9,7 @@ defmodule FolkDiscordBot.MessageContent do
 
   @type t() :: %__MODULE__{
           author_name: String.t() | nil,
-          media: [Media.t()],
+          media: [Media.result()],
           text: String.t(),
           timestamp: DateTime.t() | nil
         }
