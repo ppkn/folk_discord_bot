@@ -1,42 +1,14 @@
 defmodule DokuwikiApi do
   def append_page(page, text) do
-    body = %{page: page, text: text}
-
-    case request("core.appendPage", body) do
-      {:ok, %Req.Response{body: %{"result" => true}}} ->
-        :ok
-
-      {:ok, %Req.Response{body: %{"error" => error}}} ->
-        {:error, {:dokuwiki_error, error}}
-
-      {:error, error} ->
-        {:error, error}
-    end
+    "core.appendPage"
+    |> request(%{page: page, text: text})
+    |> expect_true_result()
   end
 
   def save_media(name, base64) do
-    body = %{media: name, base64: base64}
-
-    case request("core.saveMedia", body) do
-      {:ok, %Req.Response{body: %{"result" => true}}} ->
-        :ok
-
-      {:ok, %Req.Response{body: %{"error" => error}}} ->
-        {:error, {:dokuwiki_error, error}}
-
-      {:error, error} ->
-        {:error, error}
-    end
-  end
-
-  def version() do
-    case request("core.getAPIVersion", %{}) do
-      {:ok, %Req.Response{body: body}} ->
-        {:ok, body}
-
-      {:error, error} ->
-        {:error, error}
-    end
+    "core.saveMedia"
+    |> request(%{media: name, base64: base64})
+    |> expect_true_result()
   end
 
   defp base_url(), do: System.fetch_env!("DOKUWIKI_URL")
@@ -48,6 +20,16 @@ defmodule DokuwikiApi do
       json: content
     )
   end
+
+  defp expect_true_result({:ok, %Req.Response{body: %{"result" => true}}}), do: :ok
+
+  defp expect_true_result({:ok, %Req.Response{body: %{"error" => error}}}),
+    do: {:error, {:dokuwiki_error, error}}
+
+  defp expect_true_result({:ok, %Req.Response{status: status}}),
+    do: {:error, {:unexpected_response, status}}
+
+  defp expect_true_result({:error, _} = error), do: error
 
   defp token(), do: System.fetch_env!("DOKUWIKI_TOKEN")
 end
