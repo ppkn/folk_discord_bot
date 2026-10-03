@@ -1,4 +1,4 @@
-defmodule FolkDiscordBot.MessageContent.Media do
+defmodule FolkDiscordBot.Media do
   @moduledoc """
   A Discord attachment downloaded for upload to the wiki.
 

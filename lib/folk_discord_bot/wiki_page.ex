@@ -3,8 +3,7 @@ defmodule FolkDiscordBot.WikiPage do
   Names wiki pages and media, and renders message content as DokuWiki markup.
   """
 
-  alias FolkDiscordBot.MessageContent
-  alias FolkDiscordBot.MessageContent.Media
+  alias FolkDiscordBot.{Media, MessageContent}
 
   @namespace "newsletters"
 

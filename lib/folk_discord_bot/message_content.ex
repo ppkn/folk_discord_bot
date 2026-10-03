@@ -1,18 +1,21 @@
 defmodule FolkDiscordBot.MessageContent do
   @moduledoc """
   The parts of a Discord message needed for the wiki: author, text, timestamp
-  and fetched attachments.
+  and attachments.
+
+  Attachments are kept as metadata only. Their bytes are downloaded later, one
+  at a time, so a message with many large files doesn't hold them all in memory.
   """
 
-  alias FolkDiscordBot.MessageContent.Media
+  alias Nostrum.Struct.Message.Attachment
   require Logger
 
-  @enforce_keys [:author_name, :media, :text, :timestamp]
+  @enforce_keys [:author_name, :attachments, :text, :timestamp]
   defstruct @enforce_keys
 
   @type t() :: %__MODULE__{
           author_name: String.t(),
-          media: [Media.result()],
+          attachments: [Attachment.t()],
           text: String.t(),
           timestamp: DateTime.t()
         }
@@ -30,11 +33,9 @@ defmodule FolkDiscordBot.MessageContent do
 
   @spec process(Nostrum.Struct.Message.t()) :: t()
   defp process(message) do
-    media = Enum.map(message.attachments, &Media.fetch_from_attachment/1)
-
     %__MODULE__{
       author_name: message.author.username,
-      media: media,
+      attachments: message.attachments,
       text: message.content,
       timestamp: message.timestamp
     }

@@ -6,7 +6,7 @@ defmodule FolkDiscordBot do
   the message and its attachments are appended to that month's newsletter page.
   """
 
-  alias FolkDiscordBot.{Member, MessageContent, WikiPage}
+  alias FolkDiscordBot.{Media, Member, MessageContent, WikiPage}
   alias Nostrum.Cache.GuildCache
   require Logger
 
@@ -50,15 +50,19 @@ defmodule FolkDiscordBot do
   end
 
   defp update_page(wiki, message_content) do
-    uploads = Enum.map(message_content.media, &upload_media(wiki, &1))
+    uploads = Enum.map(message_content.attachments, &upload_attachment(wiki, &1))
     wiki_content = WikiPage.render(message_content, uploads)
 
     DokuWiki.append_page(wiki, WikiPage.name(message_content), wiki_content)
   end
 
-  defp upload_media(_wiki, {:error, _reason} = error), do: error
+  defp upload_attachment(wiki, attachment) do
+    with {:ok, media} <- Media.fetch_from_attachment(attachment) do
+      upload_media(wiki, media)
+    end
+  end
 
-  defp upload_media(wiki, {:ok, media}) do
+  defp upload_media(wiki, media) do
     filename = WikiPage.media_name(media)
 
     case DokuWiki.save_media(wiki, filename, Base.encode64(media.bytes)) do

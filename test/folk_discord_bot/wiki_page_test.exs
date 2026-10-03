@@ -7,7 +7,7 @@ defmodule FolkDiscordBot.WikiPageTest do
     author_name: "dpip",
     timestamp: ~U[2026-10-02 01:56:40.273000Z],
     text: "hello",
-    media: []
+    attachments: []
   }
 
   describe "name/1" do

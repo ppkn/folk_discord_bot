@@ -1,7 +1,7 @@
-defmodule FolkDiscordBot.MessageContent.MediaTest do
+defmodule FolkDiscordBot.MediaTest do
   use ExUnit.Case, async: true
 
-  alias FolkDiscordBot.MessageContent.Media
+  alias FolkDiscordBot.Media
 
   @moduletag :capture_log
 
