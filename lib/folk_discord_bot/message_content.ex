@@ -1,4 +1,9 @@
 defmodule FolkDiscordBot.MessageContent do
+  @moduledoc """
+  The parts of a Discord message needed for the wiki: author, text, timestamp
+  and fetched attachments.
+  """
+
   require Logger
   alias FolkDiscordBot.MessageContent.Media
 
@@ -14,10 +19,10 @@ defmodule FolkDiscordBot.MessageContent do
           timestamp: DateTime.t() | nil
         }
 
-  @spec fetch_and_process(%{channel_id: integer(), message_id: integer()}) ::
-          {:ok, t()} | {:error, any()}
-  def fetch_and_process(msg) do
-    with {:ok, message} <- fetch(msg), do: {:ok, process(message)}
+  @spec fetch_and_process(Nostrum.Struct.Event.MessageReactionAdd.t()) ::
+          {:ok, t()} | {:error, term()}
+  def fetch_and_process(event) do
+    with {:ok, message} <- fetch(event), do: {:ok, process(message)}
   end
 
   defp fetch(%{channel_id: channel_id, message_id: message_id}) do

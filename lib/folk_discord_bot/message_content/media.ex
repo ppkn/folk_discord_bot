@@ -1,4 +1,10 @@
 defmodule FolkDiscordBot.MessageContent.Media do
+  @moduledoc """
+  A Discord attachment downloaded for upload to the wiki.
+
+  Attachments over 25MB are skipped without being downloaded.
+  """
+
   require Logger
 
   @max_mb 25

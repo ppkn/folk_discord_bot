@@ -1,13 +1,20 @@
 defmodule FolkDiscordBot do
+  @moduledoc """
+  Copies Discord messages to the DokuWiki newsletter.
+
+  When a member with the `folk-system-havers` role reacts to a message with 📰,
+  the message and its attachments are appended to that month's newsletter page.
+  """
+
   alias FolkDiscordBot.{Member, MessageContent, WikiPage}
   require Logger
 
-  @spec handle_message_reaction(Nostrum.Struct.Event.MessageReactionAdd.t()) :: any()
-  def handle_message_reaction(msg) do
-    with :ok <- check_emoji(msg.emoji),
-         :ok <- check_role(msg),
+  @spec handle_message_reaction(Nostrum.Struct.Event.MessageReactionAdd.t()) :: :ok
+  def handle_message_reaction(event) do
+    with :ok <- check_emoji(event.emoji),
+         :ok <- check_role(event),
          {:ok, wiki} <- wiki_client(),
-         {:ok, message_content} <- MessageContent.fetch_and_process(msg),
+         {:ok, message_content} <- MessageContent.fetch_and_process(event),
          :ok <- update_page(wiki, message_content) do
       Logger.info("Updated page", page: WikiPage.name(message_content))
     else
@@ -19,10 +26,12 @@ defmodule FolkDiscordBot do
   defp check_emoji(%{name: "📰"}), do: :ok
   defp check_emoji(%{name: emoji}), do: {:skip, "reaction was #{emoji}"}
 
-  defp check_role(msg) do
-    if Member.has_role?(msg.member, msg.guild_id, "folk-system-havers"),
-      do: :ok,
-      else: {:skip, "Non folk-system-havers reaction"}
+  defp check_role(event) do
+    if Member.has_role?(event.member, event.guild_id, "folk-system-havers") do
+      :ok
+    else
+      {:skip, "Non folk-system-havers reaction"}
+    end
   end
 
   defp wiki_client do

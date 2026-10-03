@@ -1,4 +1,13 @@
 defmodule DokuWiki do
+  @moduledoc """
+  A minimal client for the DokuWiki JSON-RPC API.
+
+  Build a client with `new/1`, then pass it to the API functions:
+
+      {:ok, wiki} = DokuWiki.new(base_url: "https://wiki.example.com", token: "...")
+      :ok = DokuWiki.append_page(wiki, "namespace:page", "Some text")
+  """
+
   @spec new(keyword()) :: {:ok, Req.Request.t()} | {:error, {:missing_config, atom()}}
   def new(opts) do
     with {:ok, base_url} <- fetch_opt(opts, :base_url),
