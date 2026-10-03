@@ -4,8 +4,8 @@ defmodule FolkDiscordBot.MessageContent do
   and fetched attachments.
   """
 
-  require Logger
   alias FolkDiscordBot.MessageContent.Media
+  require Logger
 
   @enforce_keys [:author_name, :media, :text, :timestamp]
   defstruct @enforce_keys
