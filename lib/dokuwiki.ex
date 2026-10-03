@@ -14,7 +14,8 @@ defmodule DokuWiki do
   def new(opts) do
     with {:ok, base_url} <- fetch_opt(opts, :base_url),
          {:ok, token} <- fetch_opt(opts, :token) do
-      {:ok, Req.new(base_url: base_url <> "/lib/exe/jsonrpc.php", auth: {:bearer, token})}
+      base_url = String.trim_trailing(base_url, "/") <> "/lib/exe/jsonrpc.php"
+      {:ok, Req.new(base_url: base_url, auth: {:bearer, token})}
     end
   end
 
