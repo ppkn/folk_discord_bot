@@ -6,8 +6,9 @@ defmodule FolkDiscordBot do
   def handle_message_reaction(msg) do
     with :ok <- check_emoji(msg.emoji),
          :ok <- check_role(msg),
+         {:ok, wiki} <- wiki_client(),
          {:ok, message_content} <- MessageContent.fetch_and_process(msg),
-         :ok <- update_page(message_content) do
+         :ok <- update_page(wiki, message_content) do
       Logger.info("Updated page", page: page_name(message_content))
     else
       {:skip, reason} -> Logger.info("Skipping reaction processing", reason: reason)
@@ -16,8 +17,8 @@ defmodule FolkDiscordBot do
   end
 
   @doc false
-  def build_wiki_content(message_content) do
-    media = Enum.map(message_content.media, &upload_media/1)
+  def build_wiki_content(wiki, message_content) do
+    media = Enum.map(message_content.media, &upload_media(wiki, &1))
 
     """
 
@@ -47,27 +48,31 @@ defmodule FolkDiscordBot do
 
   @doc false
   def page_name(%{timestamp: timestamp}) do
-    year = timestamp.year
-    month = timestamp.month |> Integer.to_string() |> String.pad_leading(2, "0")
-    "newsletters:#{year}-#{month}"
+    Calendar.strftime(timestamp, "newsletters:%Y-%m")
   end
 
-  defp update_page(message_content) do
+  defp wiki_client do
+    :folk_discord_bot
+    |> Application.get_env(:dokuwiki, [])
+    |> DokuWiki.new()
+  end
+
+  defp update_page(wiki, message_content) do
     page_name = page_name(message_content)
-    wiki_content = build_wiki_content(message_content)
+    wiki_content = build_wiki_content(wiki, message_content)
 
-    DokuwikiApi.append_page(page_name, wiki_content)
+    DokuWiki.append_page(wiki, page_name, wiki_content)
   end
 
-  defp upload_media(%{bytes: nil, error: error}) when is_binary(error), do: {:skip, error}
+  defp upload_media(_wiki, %{bytes: nil, error: error}) when is_binary(error), do: {:skip, error}
 
-  defp upload_media(%{bytes: nil, name: name}),
+  defp upload_media(_wiki, %{bytes: nil, name: name}),
     do: {:skip, "Unable to fetch #{name} from Discord"}
 
-  defp upload_media(%{id: id, bytes: bytes, name: name}) do
+  defp upload_media(wiki, %{id: id, bytes: bytes, name: name}) do
     filename = "newsletters:#{short_id(id)}_#{name}"
 
-    case DokuwikiApi.save_media(filename, Base.encode64(bytes)) do
+    case DokuWiki.save_media(wiki, filename, Base.encode64(bytes)) do
       :ok ->
         {:ok, filename}
 

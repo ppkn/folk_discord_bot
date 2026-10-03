@@ -25,8 +25,10 @@ defmodule FolkDiscordBot.PageTest do
   end
 
   test "build_wiki_content/1 with no media includes header and text" do
+    {:ok, wiki} = DokuWiki.new(base_url: "http://wiki.test", token: "token")
+
     content =
-      FolkDiscordBot.build_wiki_content(%{
+      FolkDiscordBot.build_wiki_content(wiki, %{
         author_name: "dpip",
         timestamp: ~U[2026-10-02 01:56:40Z],
         text: "hello",
