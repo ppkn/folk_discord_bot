@@ -10,7 +10,8 @@ defmodule FolkDiscordBot.MessageContent.Media do
   @max_mb 25
   @max_bytes @max_mb * 1024 * 1024
 
-  defstruct [:id, :bytes, :name]
+  @enforce_keys [:id, :bytes, :name]
+  defstruct @enforce_keys
 
   @type t() :: %__MODULE__{
           id: Nostrum.Snowflake.t(),

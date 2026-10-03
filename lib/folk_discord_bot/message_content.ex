@@ -7,16 +7,14 @@ defmodule FolkDiscordBot.MessageContent do
   require Logger
   alias FolkDiscordBot.MessageContent.Media
 
-  defstruct author_name: nil,
-            media: [],
-            text: "",
-            timestamp: nil
+  @enforce_keys [:author_name, :media, :text, :timestamp]
+  defstruct @enforce_keys
 
   @type t() :: %__MODULE__{
-          author_name: String.t() | nil,
+          author_name: String.t(),
           media: [Media.result()],
           text: String.t(),
-          timestamp: DateTime.t() | nil
+          timestamp: DateTime.t()
         }
 
   @spec fetch_and_process(Nostrum.Struct.Event.MessageReactionAdd.t()) ::
