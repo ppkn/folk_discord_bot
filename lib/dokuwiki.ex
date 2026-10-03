@@ -8,7 +8,9 @@ defmodule DokuWiki do
       :ok = DokuWiki.append_page(wiki, "namespace:page", "Some text")
   """
 
-  @spec new(keyword()) :: {:ok, Req.Request.t()} | {:error, {:missing_config, atom()}}
+  @type client() :: Req.Request.t()
+
+  @spec new(keyword()) :: {:ok, client()} | {:error, {:missing_config, atom()}}
   def new(opts) do
     with {:ok, base_url} <- fetch_opt(opts, :base_url),
          {:ok, token} <- fetch_opt(opts, :token) do
@@ -16,12 +18,14 @@ defmodule DokuWiki do
     end
   end
 
+  @spec append_page(client(), String.t(), String.t()) :: :ok | {:error, term()}
   def append_page(client, page, text) do
     client
     |> request("core.appendPage", %{page: page, text: text})
     |> expect_true_result()
   end
 
+  @spec save_media(client(), String.t(), String.t()) :: :ok | {:error, term()}
   def save_media(client, name, base64) do
     client
     |> request("core.saveMedia", %{media: name, base64: base64})
