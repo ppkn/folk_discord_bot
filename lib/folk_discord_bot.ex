@@ -15,7 +15,8 @@ defmodule FolkDiscordBot do
     end
   end
 
-  defp build_wiki_content(message_content) do
+  @doc false
+  def build_wiki_content(message_content) do
     media = Enum.map(message_content.media, &upload_media/1)
 
     """
@@ -27,7 +28,8 @@ defmodule FolkDiscordBot do
     """
   end
 
-  defp render_media(media) do
+  @doc false
+  def render_media(media) do
     Enum.map_join(media, fn
       {:ok, filename} -> "{{#{filename}}}\n"
       {:skip, reason} -> "[[ERROR|#{reason}]]\n"
@@ -43,7 +45,8 @@ defmodule FolkDiscordBot do
       else: {:skip, "Non folk-system-havers reaction"}
   end
 
-  defp page_name(%{timestamp: timestamp}) do
+  @doc false
+  def page_name(%{timestamp: timestamp}) do
     year = timestamp.year
     month = timestamp.month |> Integer.to_string() |> String.pad_leading(2, "0")
     "newsletters:#{year}-#{month}"

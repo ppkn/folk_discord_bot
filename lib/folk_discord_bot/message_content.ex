@@ -30,7 +30,7 @@ defmodule FolkDiscordBot.MessageContent do
     Nostrum.Api.Message.get(channel_id, message_id)
   end
 
-  defp fetch(msg), do: {:error, "Need channel_id and message_id, got #{Map.keys(msg)}"}
+  defp fetch(msg), do: {:error, "Need channel_id and message_id, got #{inspect(Map.keys(msg))}"}
 
   @spec process(Nostrum.Struct.Message.t()) :: {:ok, t()}
   defp process(message) do
