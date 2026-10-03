@@ -7,12 +7,14 @@ defmodule FolkDiscordBot do
   """
 
   alias FolkDiscordBot.{Member, MessageContent, WikiPage}
+  alias Nostrum.Cache.GuildCache
   require Logger
 
   @spec handle_message_reaction(Nostrum.Struct.Event.MessageReactionAdd.t()) :: :ok
   def handle_message_reaction(event) do
     with :ok <- check_emoji(event.emoji),
-         :ok <- check_role(event),
+         {:ok, guild} <- fetch_guild(event.guild_id),
+         :ok <- check_role(event.member, guild),
          {:ok, wiki} <- wiki_client(),
          {:ok, message_content} <- MessageContent.fetch_and_process(event),
          :ok <- update_page(wiki, message_content) do
@@ -26,8 +28,15 @@ defmodule FolkDiscordBot do
   defp check_emoji(%{name: "📰"}), do: :ok
   defp check_emoji(%{name: emoji}), do: {:skip, "reaction was #{emoji}"}
 
-  defp check_role(event) do
-    if Member.has_role?(event.member, event.guild_id, "folk-system-havers") do
+  defp fetch_guild(guild_id) do
+    case GuildCache.get(guild_id) do
+      {:ok, guild} -> {:ok, guild}
+      {:error, :not_found} -> {:error, {:guild_not_cached, guild_id}}
+    end
+  end
+
+  defp check_role(member, guild) do
+    if Member.has_role?(member, guild, "folk-system-havers") do
       :ok
     else
       {:skip, "Non folk-system-havers reaction"}
