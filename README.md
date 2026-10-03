@@ -17,3 +17,9 @@ Then open `.env` and fill out the environment variables
   - `remote` must be enabled in the Admin configuration
   - `remoteuser` must contain this username, or group this user belongs to
   - this user must at least have access to Upload in the newsletters namespace
+
+## Run
+
+```
+make
+```
