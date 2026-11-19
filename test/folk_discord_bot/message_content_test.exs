@@ -18,6 +18,12 @@ defmodule FolkDiscordBot.MessageContentTest do
   defp reaction(name, me), do: %Reaction{count: 1, me: me, emoji: %Emoji{name: name}}
 
   describe "process/1" do
+    test "converts the timestamp to New York time" do
+      timestamp = MessageContent.process(message([])).timestamp
+      assert timestamp.time_zone == "America/New_York"
+      assert DateTime.to_naive(timestamp) == ~N[2026-10-01 21:56:40]
+    end
+
     test "is saved when the bot reacted with ✅" do
       reactions = [reaction("📰", false), reaction("✅", true)]
       assert MessageContent.process(message(reactions)).saved

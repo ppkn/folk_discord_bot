@@ -40,6 +40,10 @@ defmodule FolkDiscordBot.MessageContent do
   @spec saved_emoji() :: String.t()
   def saved_emoji, do: "✅"
 
+  @doc "The time zone message timestamps are converted to, and newsletters are bucketed by."
+  @spec time_zone() :: String.t()
+  def time_zone, do: "America/New_York"
+
   @doc false
   @spec process(Nostrum.Struct.Message.t()) :: t()
   def process(message) do
@@ -48,7 +52,7 @@ defmodule FolkDiscordBot.MessageContent do
       attachments: message.attachments,
       saved: saved?(message.reactions),
       text: message.content,
-      timestamp: message.timestamp
+      timestamp: DateTime.shift_zone!(message.timestamp, time_zone())
     }
   end
 

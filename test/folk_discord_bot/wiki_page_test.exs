@@ -5,7 +5,7 @@ defmodule FolkDiscordBot.WikiPageTest do
 
   @message_content %{
     author_name: "dpip",
-    timestamp: ~U[2026-10-02 01:56:40.273000Z],
+    timestamp: DateTime.shift_zone!(~U[2026-10-02 01:56:40.273000Z], "America/New_York"),
     text: "hello",
     attachments: []
   }
@@ -20,6 +20,37 @@ defmodule FolkDiscordBot.WikiPageTest do
     end
   end
 
+  describe "too_old?/2" do
+    @now ~U[2026-11-18 12:00:00Z]
+
+    defp ny(utc), do: %{timestamp: DateTime.shift_zone!(utc, "America/New_York")}
+
+    test "allows messages from the current month" do
+      refute WikiPage.too_old?(ny(~U[2026-11-05 00:00:00Z]), @now)
+    end
+
+    test "allows messages from the start of last month in New York" do
+      # 2026-10-01 00:00 EDT
+      refute WikiPage.too_old?(ny(~U[2026-10-01 04:00:00Z]), @now)
+    end
+
+    test "rejects messages from the end of two months ago in New York" do
+      # 2026-09-30 23:59:59 EDT
+      assert WikiPage.too_old?(ny(~U[2026-10-01 03:59:59Z]), @now)
+    end
+
+    test "uses New York's month for now too" do
+      # 2026-12-01 02:00 UTC is still 2026-11-30 in New York, so October is allowed
+      refute WikiPage.too_old?(ny(~U[2026-10-01 04:00:00Z]), ~U[2026-12-01 02:00:00Z])
+    end
+
+    test "handles year boundaries" do
+      now = ~U[2026-01-15 00:00:00Z]
+      refute WikiPage.too_old?(ny(~U[2025-12-01 05:00:00Z]), now)
+      assert WikiPage.too_old?(ny(~U[2025-12-01 04:59:59Z]), now)
+    end
+  end
+
   describe "media_name/1" do
     test "prefixes the filename with the last 6 digits of the attachment id" do
       assert WikiPage.media_name(%{id: 1_555_398_079_622_942_791, name: "image.png"}) ==
@@ -31,7 +62,7 @@ defmodule FolkDiscordBot.WikiPageTest do
     test "includes the header and text" do
       content = WikiPage.render(@message_content, [])
 
-      assert content =~ "=== dpip | 2026-10-02 01:56 UTC ==="
+      assert content =~ "=== dpip | 2026-10-01 21:56 EDT ==="
       assert content =~ "hello"
     end
 

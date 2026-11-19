@@ -20,6 +20,7 @@ defmodule FolkDiscordBot do
          {:ok, wiki} <- wiki_client(),
          {:ok, message_content} <- MessageContent.fetch_and_process(event),
          :ok <- check_not_saved(message_content),
+         :ok <- check_not_too_old(message_content),
          :ok <- update_page(wiki, message_content),
          :ok <- mark_saved(event) do
       Logger.info("Updated page", page: WikiPage.name(message_content))
@@ -49,6 +50,14 @@ defmodule FolkDiscordBot do
 
   defp check_not_saved(%{saved: true}), do: {:skip, "message was already saved"}
   defp check_not_saved(_message_content), do: :ok
+
+  defp check_not_too_old(message_content) do
+    if WikiPage.too_old?(message_content) do
+      {:skip, "message is too old to add to the newsletter"}
+    else
+      :ok
+    end
+  end
 
   # Runs after the page is updated, so a failed update can be retried with
   # another 📰.

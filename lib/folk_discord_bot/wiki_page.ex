@@ -12,6 +12,24 @@ defmodule FolkDiscordBot.WikiPage do
   @spec name(MessageContent.t()) :: String.t()
   def name(%{timestamp: timestamp}), do: Calendar.strftime(timestamp, "#{@namespace}:%Y-%m")
 
+  @doc """
+  Whether the message is too old to add to the wiki.
+
+  Only the current and previous month's newsletters may be updated. Months
+  are those of the message's own time zone (see `MessageContent.time_zone/0`).
+  """
+  @spec too_old?(MessageContent.t(), DateTime.t()) :: boolean()
+  def too_old?(%{timestamp: timestamp}, now \\ DateTime.utc_now()) do
+    cutoff =
+      now
+      |> DateTime.shift_zone!(timestamp.time_zone)
+      |> DateTime.to_date()
+      |> Date.beginning_of_month()
+      |> Date.shift(month: -1)
+
+    Date.compare(DateTime.to_date(timestamp), cutoff) == :lt
+  end
+
   @spec media_name(Media.t()) :: String.t()
   def media_name(%{id: id, name: name}), do: "#{@namespace}:#{short_id(id)}_#{name}"
 
@@ -34,7 +52,7 @@ defmodule FolkDiscordBot.WikiPage do
     |> Enum.map_join("\n\n", &String.replace(&1, "\n", "\\\\\n"))
   end
 
-  defp format_timestamp(timestamp), do: Calendar.strftime(timestamp, "%Y-%m-%d %H:%M UTC")
+  defp format_timestamp(timestamp), do: Calendar.strftime(timestamp, "%Y-%m-%d %H:%M %Z")
 
   defp render_uploads(uploads) do
     Enum.map_join(uploads, fn

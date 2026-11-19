@@ -26,7 +26,8 @@ defmodule FolkDiscordBot.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:nostrum, "~> 0.10"},
-      {:req, "~> 0.5.0"}
+      {:req, "~> 0.5.0"},
+      {:tz, "~> 0.28"}
     ]
   end
 end
