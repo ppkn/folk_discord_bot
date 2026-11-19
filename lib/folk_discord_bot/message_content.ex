@@ -1,7 +1,11 @@
 defmodule FolkDiscordBot.MessageContent do
   @moduledoc """
   The parts of a Discord message needed for the wiki: author, text, timestamp
-  and attachments.
+  and attachments, plus whether the bot has already saved it.
+
+  A saved message carries the bot's own ✅ reaction. Keeping that marker on
+  the message itself means it survives restarts and deploys without any other
+  storage.
 
   Attachments are kept as metadata only. Their bytes are downloaded later, one
   at a time, so a message with many large files doesn't hold them all in memory.
@@ -10,12 +14,13 @@ defmodule FolkDiscordBot.MessageContent do
   alias Nostrum.Struct.Message.Attachment
   require Logger
 
-  @enforce_keys [:author_name, :attachments, :text, :timestamp]
+  @enforce_keys [:author_name, :attachments, :saved, :text, :timestamp]
   defstruct @enforce_keys
 
   @type t() :: %__MODULE__{
           author_name: String.t(),
           attachments: [Attachment.t()],
+          saved: boolean(),
           text: String.t(),
           timestamp: DateTime.t()
         }
@@ -31,13 +36,23 @@ defmodule FolkDiscordBot.MessageContent do
     Nostrum.Api.Message.get(channel_id, message_id)
   end
 
+  @doc "The reaction the bot adds to a message once it is saved to the wiki."
+  @spec saved_emoji() :: String.t()
+  def saved_emoji, do: "✅"
+
+  @doc false
   @spec process(Nostrum.Struct.Message.t()) :: t()
-  defp process(message) do
+  def process(message) do
     %__MODULE__{
       author_name: message.author.username,
       attachments: message.attachments,
+      saved: saved?(message.reactions),
       text: message.content,
       timestamp: message.timestamp
     }
+  end
+
+  defp saved?(reactions) do
+    Enum.any?(reactions || [], &(&1.me and &1.emoji.name == saved_emoji()))
   end
 end
