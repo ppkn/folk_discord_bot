@@ -4,9 +4,11 @@ defmodule FolkDiscordBot do
 
   When a member with the `folk-system-havers` role reacts to a message with 📰,
   the message and its attachments are appended to that month's newsletter page.
+  The bot then reacts with ✅ so the same message is never appended twice.
   """
 
   alias FolkDiscordBot.{Media, Member, MessageContent, WikiPage}
+  alias Nostrum.Api.Message
   alias Nostrum.Cache.GuildCache
   require Logger
 
@@ -17,7 +19,9 @@ defmodule FolkDiscordBot do
          :ok <- check_role(event.member, guild),
          {:ok, wiki} <- wiki_client(),
          {:ok, message_content} <- MessageContent.fetch_and_process(event),
-         :ok <- update_page(wiki, message_content) do
+         :ok <- check_not_saved(message_content),
+         :ok <- update_page(wiki, message_content),
+         :ok <- mark_saved(event) do
       Logger.info("Updated page", page: WikiPage.name(message_content))
     else
       {:skip, reason} -> Logger.info("Skipping reaction processing", reason: reason)
@@ -40,6 +44,18 @@ defmodule FolkDiscordBot do
       :ok
     else
       {:skip, "Non folk-system-havers reaction"}
+    end
+  end
+
+  defp check_not_saved(%{saved: true}), do: {:skip, "message was already saved"}
+  defp check_not_saved(_message_content), do: :ok
+
+  # Runs after the page is updated, so a failed update can be retried with
+  # another 📰.
+  defp mark_saved(%{channel_id: channel_id, message_id: message_id}) do
+    case Message.react(channel_id, message_id, MessageContent.saved_emoji()) do
+      {:ok} -> :ok
+      {:error, error} -> {:error, {:mark_saved_failed, message_id, error}}
     end
   end
 
